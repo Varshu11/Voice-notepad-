@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Accessible Voice Notepad 💙</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      padding: 2rem;
+      text-align: center;
+      transition: background 0.5s, color 0.5s;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 250px;
+      padding: 1rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid #ccc;
+      resize: none;
+    }
+    select, button {
+      margin: 0.5rem;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .dyslexia {
+      font-family: 'Atkinson Hyperlegible', Arial, sans-serif;
+    }
+    .contrast {
+      background: #000;
+      color: #ff0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Accessible Voice Notepad</h1>
+
+    <label for="language">🌐 Language: </label>
+    <select id="language">
+      <option value="en-US">English</option>
+      <option value="ta-IN">Tamil</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="fr-FR">French</option>
+      <option value="es-ES">Spanish</option>
+    </select><br/>
+
+    <button onclick="startListening()">🎙️ Start Listening</button>
+    <button onclick="readAloud()">🔊 Read Aloud</button>
+    <button onclick="clearNote()">🗑️ Clear Note</button>
+    <button onclick="toggleFont()">🔤 Toggle Dyslexia Font</button>
+    <button onclick="toggleContrast()">🌓 High Contrast</button>
+
+    <br/><br/>
+    <textarea id="note" placeholder="Start speaking or typing..."></textarea>
+  </div>
+
+  <script>
+    const note = document.getElementById("note");
+    const language = document.getElementById("language");
+
+    note.value = localStorage.getItem("voiceNote") || "";
+
+    note.addEventListener("input", () => {
+      localStorage.setItem("voiceNote", note.value);
+    });
+
+    function startListening() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return alert("Speech Recognition not supported 😢");
+
+      const recognition = new SpeechRecognition();
+      recognition.lang = language.value;
+      recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        note.value += text + " ";
+        localStorage.setItem("voiceNote", note.value);
+      };
+      recognition.start();
+    }
+
+    function readAloud() {
+      const utterance = new SpeechSynthesisUtterance(note.value);
+      utterance.lang = language.value;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function clearNote() {
+      if (confirm("Clear all notes?")) {
+        note.value = "";
+        localStorage.removeItem("voiceNote");
+      }
+    }
+
+    function toggleFont() {
+      document.body.classList.toggle("dyslexia");
+    }
+
+    function toggleContrast() {
+      document.body.classList.toggle("contrast");
+    }
+  </script>
+</body>
+</html>
